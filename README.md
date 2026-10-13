@@ -2,8 +2,6 @@
 
 Accepted to **EMNLP 2026 Main Conference**.
 
-Authors: Yusen Wu, Huang Yinjun, Jia Yee Tan, Hao Li, Rongfeng Guo, Liang Fan, Jiachen Luo, Guangyuan Dong, and Sike Xiang (corresponding author).
-
 CentralKV is a training-free method for reducing the memory cost of long-context large language models. It models the causal attention pattern as a dynamic sparse graph and preserves structurally important bridge tokens during KV-cache compression. The implementation in this repository contains the algorithm, model integration, evaluation scripts, and unit tests used for the paper.
 
 Project page: https://sanmu-27.github.io/CentralKV-/  
