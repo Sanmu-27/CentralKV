@@ -1,28 +1,29 @@
 # CentralKV: Compressing Long-Context LLMs via Attention-Graph Centrality
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Framework](https://img.shields.io/badge/Framework-PyTorch-orange.svg)](https://pytorch.org/)
+Accepted to **EMNLP 2026 Main Conference**.
 
-> ⚠️ **Note:** This repository is a **preview release** submitted for peer review, focused on **functional verification**. The full codebase, including extensive baselines, optimized kernels, and scripts to reproduce the **full paper results**, will be released upon acceptance.
+Authors: Yusen Wu, Huang Yinjun, Jia Yee Tan, Hao Li, Rongfeng Guo, Liang Fan, Jiachen Luo, Guangyuan Dong, and Sike Xiang (corresponding author).
 
-**CentralKV** is a training-free framework designed to address the memory bottlenecks of Long-Context Large Language Models (LLMs). By modeling the self-attention mechanism as a dynamic sparse graph, CentralKV identifies and retains "Structural Bridges"—tokens with high graph centrality that act as critical semantic connectors—ensuring coherent reasoning even under high compression rates.
+CentralKV is a training-free method for reducing the memory cost of long-context large language models. It models the causal attention pattern as a dynamic sparse graph and preserves structurally important bridge tokens during KV-cache compression. The implementation in this repository contains the algorithm, model integration, evaluation scripts, and unit tests used for the paper.
+
+Project page: https://sanmu-27.github.io/CentralKV-/  
+Paper: https://sanmu-27.github.io/CentralKV-/static/pdfs/CentralKV.pdf
 
 ---
 
-## 🌟 Key Features
+## Method
 
-- **Graph-Theoretic Compression**  
-  Moves beyond first-order statistics (e.g., accumulated attention in H2O) to capture higher-order topological importance via PageRank centrality.
+- **Attention graph construction**  
+  Reuses attention weights to construct a sparse causal graph and estimate higher-order token importance.
 
-- **Zero-Cost Construction**  
-  Efficiently constructs the attention graph by reusing existing attention weights, avoiding the $O(N \cdot d)$ overhead of similarity-based methods like GraphKV.
+- **Stream-PageRank updates**  
+  Maintains centrality scores incrementally during decoding without a separate training stage.
 
-- **Stream-PageRank Algorithm**  
-  Implements an incremental, amortized $O(1)$ centrality update mechanism, making it suitable for real-time streaming inference.
+- **Cache preservation**  
+  Protects the system prompt and recent local window, then evicts low-centrality tokens under a prescribed budget.
 
-- **Seamless Integration**  
-  Plug-and-play compatibility with popular RoPE-based models (Llama-2, Llama-3, TinyLlama) via standard HuggingFace Transformers integration.
+- **Model integration**  
+  Provides a HuggingFace Transformers patch for supported RoPE-based causal language models.
 
 ---
 
@@ -47,7 +48,7 @@ The repository is organized to facilitate reproducibility and extension:
 
 ---
 
-## 🚀 Getting Started
+## Getting started
 
 ### Prerequisites
 
@@ -88,7 +89,7 @@ output = model.generate(**inputs, max_new_tokens=100)
 
 ---
 
-## 📊 Analysis & Visualization
+## Analysis and visualization
 
 We provide a comprehensive suite of tools to analyze the attention dynamics and verify the "Bridge Token" hypothesis.
 
@@ -126,12 +127,12 @@ exporter.export_to_gexf(graph_data, step=100)
 
 ---
 
-## 🧪 Experiments
+## Experiments
 
 ### Needle In A Haystack (NIAH)
-Verify long-context retrieval capabilities (Figure 3 in the paper).
+Verify long-context retrieval capabilities.
 
-**Note:** For fast verification during peer review, we default to using `SmolLM-135M` (a lightweight Llama architecture).
+For a lightweight local check, the default configuration uses `SmolLM-135M`.
 
 ```bash
 # Downloads SmolLM-135M to ./local_models and runs a grid search (Length 1k-32k)
@@ -149,7 +150,7 @@ python benchmarks/needle_in_haystack/run_niah.py \
 ### LongBench Evaluation
 Validate the compression logic on standard benchmarks.
 
-> **Note:** The provided script runs a **mini-batch verification** to demonstrate functional correctness. Reproducing the full paper results (Table 2) requires the full Llama-2-7B/Llama-3-8B models and the complete LongBench dataset (approx. 200GB+).
+The provided script runs a compact verification. Reproducing the complete reported results requires the corresponding Llama models and the full LongBench dataset.
 
 ```bash
 bash scripts/run_longbench.sh --model llama3-8b --method centralkv
@@ -160,3 +161,15 @@ bash scripts/run_longbench.sh --model llama3-8b --method centralkv
 ## ⚖️ License
 
 This project is released under the MIT License.
+
+## Citation
+
+```bibtex
+@inproceedings{wu2026centralkv,
+  title     = {CentralKV: Compressing Long-Context LLMs via Attention-Graph Centrality},
+  author    = {Wu, Yusen and Yinjun, Huang and Tan, Jia Yee and Li, Hao and Guo, Rongfeng and Fan, Liang and Luo, Jiachen and Dong, Guangyuan and Xiang, Sike},
+  booktitle = {Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing},
+  year      = {2026},
+  url       = {https://sanmu-27.github.io/CentralKV-/}
+}
+```
